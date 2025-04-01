@@ -9,13 +9,32 @@ async function loadModels() {
         await faceapi.nets.ssdMobilenetv1.loadFromUri(MODEL_URL);
         await faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL);
         await faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL);
-        await faceapi.nets.faceExpressionNet.loadFromUri(MODEL_URL);
         console.log("✅ Modelos cargados correctamente");
         startCamera();
     } catch (error) {
         console.error("❌ Error al cargar los modelos:", error);
     }
 }
+
+// 📌 Almacenar los descriptores de los rostros registrados
+let registeredDescriptors = [];
+
+// 📌 Función para cargar los descriptores de los rostros registrados
+const loadStoredDescriptors = () => {
+    const existingDescriptors = JSON.parse(localStorage.getItem('faceDescriptors')) || [];
+    return existingDescriptors.map(item => ({
+        name: item.name,
+        descriptors: item.descriptors.map(descriptor => new Float32Array(descriptor))
+    }));
+};
+
+// 📌 Función para registrar un usuario
+const registerUser = (userName, descriptors) => {
+    let existingDescriptors = JSON.parse(localStorage.getItem('faceDescriptors')) || [];
+    existingDescriptors.push({ name: userName, descriptors: descriptors });
+    localStorage.setItem('faceDescriptors', JSON.stringify(existingDescriptors));
+    console.log(`Usuario registrado: ${userName}`);
+};
 
 // 📌 Acceder a la cámara
 async function startCamera() {
@@ -43,26 +62,33 @@ async function detectFaces() {
     setInterval(async () => {
         const detections = await faceapi.detectAllFaces(video, new faceapi.SsdMobilenetv1Options())
             .withFaceLandmarks()
-            .withFaceExpressions();
+            .withFaceDescriptors();
 
         // Limpiar el canvas antes de dibujar
         context.clearRect(0, 0, canvas.width, canvas.height);
         faceapi.draw.drawDetections(canvas, detections);
         faceapi.draw.drawFaceLandmarks(canvas, detections);
-        faceapi.draw.drawFaceExpressions(canvas, detections, 0.05);
 
-        // 📌 Detectar si la persona está sonriendo
-        if (detections.length > 0) {
-            const expressions = detections[0].expressions;
-            const smileProbability = expressions.happy;
+        // 📌 Comparar los rostros detectados con los descriptores registrados
+        const labeledDescriptors = loadStoredDescriptors();
+        const faceMatcher = new faceapi.FaceMatcher(labeledDescriptors, 0.6);
 
-            // Mostrar mensaje de sonrisa
-            if (smileProbability > 0.5) {
-                console.log(" Estás sonriendoooo");
+        detections.forEach(detection => {
+            const result = faceMatcher.findBestMatch(detection.descriptor);
+            const { label, distance } = result;
+
+            if (distance < 0.6) {
+                // Rostro reconocido: dibujar un recuadro verde con el nombre
+                const box = detection.detection.box;
+                new faceapi.draw.DrawBox(box, { label: label }).draw(canvas);
+                console.log(`Rostro reconocido como: ${label}`);
             } else {
-                console.log("No estás sonriendo");
+                // Rostro desconocido: dibujar un recuadro rojo
+                const box = detection.detection.box;
+                new faceapi.draw.DrawBox(box, { label: 'Desconocido' }).draw(canvas);
+                console.log('Rostro desconocido');
             }
-        }
+        });
     }, 100);
 }
 

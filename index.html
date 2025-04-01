@@ -1,21 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Face Recognition System</title>
-
+    <title>Rover Control</title>
     <script src="./public/js/face-api.min.js"></script>
-
+    <script src="./public/js/script_webcam.js" type="module"></script>
+    <script src="./public/js/script.js" type="module"></script>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
         body {
             text-align: center;
             background: #f2f6f8;
@@ -23,8 +16,8 @@
 
         #container {
             display: inline-block;
-            width: 700px;
-            height: 500px;
+            width: 612px;
+            height: 612px;
             margin: 0 auto;
             background: black;
             position: relative;
@@ -33,31 +26,59 @@
             box-shadow: 0 5px 50px #333;
         }
 
-        video {
-            position: absolute;
+        #video {
             width: 100%;
             height: 100%;
             object-fit: cover;
-            border-radius: 10px;
         }
 
-        canvas {
-            position: absolute;
-            z-index: 10;
+        .controls {
+            margin-top: 20px;
+        }
+
+        button {
+            padding: 10px;
+            margin: 10px;
+            cursor: pointer;
+        }
+
+        .mode-button {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        .move-button {
+            background-color: #2196F3;
+            color: white;
         }
     </style>
 </head>
-
 <body>
 
-    <h1>Detección Facial con Face-API.js</h1>
-
     <div id="container">
-        <video id="video" autoplay muted></video>
+        <video id="video" autoplay></video>
         <canvas id="canvas"></canvas>
     </div>
 
-    <script src="./public/js/script_webcam.js" type="module"></script>
+    <!-- Conexión y Control del Rover -->
+    <div class="controls">
+        <input type="text" id="ipInput" placeholder="Ingrese la IP del Rover" />
+        <button id="connectBtn">Conectar</button>
+        <br />
+        <button class="mode-button" id="modeBtn">Cambiar a Modo Manual</button>
+        <div class="movement-controls">
+            <button class="move-button" id="moveForwardBtn">Adelante</button>
+            <button class="move-button" id="moveBackBtn">Atrás</button>
+            <button class="move-button" id="moveLeftBtn">Izquierda</button>
+            <button class="move-button" id="moveRightBtn">Derecha</button>
+        </div>
+    </div>
+    <div class="register">
+        <h3>Registrar Usuario</h3>
+        <input type="text" id="userName" placeholder="Ingrese su nombre" />
+        <button id="registerBtn">Registrar</button>
+        <button id="captureBtn">Capturar Rostros</button>
+        <p id="status"></p>
+    </div>
 </body>
-
 </html>

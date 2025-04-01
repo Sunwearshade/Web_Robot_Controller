@@ -1,14 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title></title>
-
+    <title>Control Rover</title>
     <script src="./public/js/face-api.min.js"></script>
-
+    <script src="./public/js/script_webcam.js" type="module"></script>
     <style>
         * {
             box-sizing: border-box;
@@ -27,14 +25,10 @@
         }
     </style>
 </head>
-
 <body>
     <div style="position: relative">
         <video onloadedmetadata="onPlay(this)" id="inputVideo" autoplay muted playsinline></video>
-        <canvas id="overlay">
+        <canvas id="overlay"></canvas>
     </div>
-
-    <script src="./public/js/script_webcam.js"></script>
 </body>
-
 </html>
